@@ -10,6 +10,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import java.util.List;
 
@@ -18,8 +19,7 @@ import static io.restassured.RestAssured.when;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
-// TODO: Activate again after TODOs are resolved
-@Disabled
+
 public class TaskBoardSystemTests extends AbstractSystemTest {
 
     @Autowired

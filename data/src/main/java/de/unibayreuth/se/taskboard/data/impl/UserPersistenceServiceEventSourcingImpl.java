@@ -1,5 +1,6 @@
 package de.unibayreuth.se.taskboard.data.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.unibayreuth.se.taskboard.business.domain.User;
 import de.unibayreuth.se.taskboard.business.exceptions.DuplicateNameException;
 import de.unibayreuth.se.taskboard.business.exceptions.UserNotFoundException;
@@ -22,6 +23,7 @@ public class UserPersistenceServiceEventSourcingImpl implements UserPersistenceS
     private final UserRepository userRepository;
     private final UserEntityMapper userEntityMapper;
     private final EventRepository eventRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void clear() {
@@ -52,13 +54,22 @@ public class UserPersistenceServiceEventSourcingImpl implements UserPersistenceS
     @NonNull
     @Override
     public User upsert(User user) throws UserNotFoundException, DuplicateNameException {
-        // TODO: Implement upsert
+        if(user.getId() == null) {
+            user.setId(UUID.randomUUID());
+            eventRepository.saveAndFlush(EventEntity.insertEventOf(user,null,objectMapper));
+            return user;
+        }else{
+            var userEntityOptional = userRepository.findById(user.getId());
+            userEntityOptional.get().setName(user.getName());
+            var updatedUser = userEntityMapper.fromEntity(userEntityOptional.get());
+            eventRepository.saveAndFlush(EventEntity.updateEventOf(updatedUser,null, objectMapper));
+            return updatedUser;
+        }
         /*
         The upsert method in the UserPersistenceServiceEventSourcingImpl class handles both the creation and updating of users.
         If the user ID is null, it creates a new user by generating a new UUID, saving an insert event, and returning the newly created user.
         If the user ID is not null, it updates the existing user by finding it in the repository, updating its fields, saving an update event, and returning the updated user.
         In both cases, it uses the EventRepository to log the changes and the UserRepository to persist the user data.
         */
-        return new User("Firstname Lastname");
     }
 }
